@@ -166,7 +166,7 @@ const Comments = ({ videoId }: any) => {
           comments.map((comment) => (
             <div key={comment._id} className="flex gap-4">
               <Avatar className="w-10 h-10">
-                <AvatarImage src="/placeholder.svg?height=40&width=40" />
+                <AvatarImage  src={comment.image}/>
                 <AvatarFallback>{comment.usercommented[0]}</AvatarFallback>
               </Avatar>
               <div className="flex-1">

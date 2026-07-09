@@ -31,8 +31,6 @@ setvideo(selectedVideo);
   }, [id]);
  const filteredVideos = video.filter((vid: any) => vid._id !== id);
 
-console.log("Filtered IDs:", filteredVideos.map((v: any) => v._id));
-<RelatedVideos videos={filteredVideos} />
   if (loading) {
     return <div>Loading..</div>;
   }
@@ -40,7 +38,6 @@ console.log("Filtered IDs:", filteredVideos.map((v: any) => v._id));
   if (!videos) {
     return <div>Video not found</div>;
   }
-  console.log("Current ID:", id);
 console.log(
   "Related IDs:",
   video.map((v: any) => v._id)
@@ -50,8 +47,11 @@ console.log(
       <div className="max-w-7xl mx-auto p-4">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-4">
-            <Videopplayer video={videos} />
-            <VideoInfo video={videos} />
+<Videopplayer
+ key={videos._id}
+  video={videos}
+  nextVideo={filteredVideos.length > 0 ? filteredVideos[0] : null}
+/>            <VideoInfo video={videos} />
             <Comments videoId={id} />
           </div>
           <div className="space-y-4">

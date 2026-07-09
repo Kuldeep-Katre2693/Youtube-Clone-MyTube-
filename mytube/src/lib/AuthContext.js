@@ -33,7 +33,6 @@ export const UserProvider = ({ children }) => {
         image: firebaseuser.photoURL || "https://github.com/shadcn.png",
       };
       const response = await axiosInstance.post("/user/login", payload);
-      console.log("LOGIN RESPONSE:", response.data);
       login(response.data.result);
     } catch (error) {
       console.error(error);
@@ -49,7 +48,6 @@ export const UserProvider = ({ children }) => {
             image: firebaseuser.photoURL || "https://github.com/shadcn.png",
           };
           const response = await axiosInstance.post("/user/login", payload);
-          console.log("LOGIN RESPONSE:", response.data);
           login(response.data.result);
         } catch (error) {
           console.error(error);
