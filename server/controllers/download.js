@@ -73,3 +73,22 @@ export const downloadVideo = async (req, res) => {
     });
   }
 };
+
+export const getMyDownloads = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const downloads = await Download.find({ userId })
+      .populate("videoId")
+      .sort({ createdAt: -1 });
+
+    return res.status(200).json(downloads);
+
+  } catch (error) {
+    console.log(error);
+
+    return res.status(500).json({
+      message: "Something went wrong",
+    });
+  }
+};
