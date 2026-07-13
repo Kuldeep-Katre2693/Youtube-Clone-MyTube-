@@ -1,4 +1,4 @@
-import Download from "../Modals/Download.js";
+import Download from "../Modals/download.js";
 import users from "../Modals/Auth.js";
 import video from "../Modals/video.js";
 

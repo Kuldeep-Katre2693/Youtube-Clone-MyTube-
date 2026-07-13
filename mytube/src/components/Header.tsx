@@ -1,4 +1,4 @@
-import { Bell, Menu, Mic, Search, User, VideoIcon } from "lucide-react";
+import { Bell, Menu, Mic, Search, User, VideoIcon,Crown } from "lucide-react";
 import React, { useState } from "react";
 import { Button } from "./ui/button";
 import Link from "next/link";
@@ -14,11 +14,13 @@ import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import Channeldialogue from "./channeldialogue";
 import { useRouter } from "next/router";
 import { useUser } from "@/lib/AuthContext";
+import SubscriptionDialog from "./SubscriptionDialog";
 
 const Header = () => {
   const { user, logout, handlegooglesignin } = useUser();
   const [searchQuery, setSearchQuery] = useState("");
   const [isdialogeopen, setisdialogeopen] = useState(false);
+  const [isSubscriptionOpen, setIsSubscriptionOpen] = useState(false);
   const router = useRouter();
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,6 +33,8 @@ const Header = () => {
       handleSearch(e as any);
     }
   };
+
+  
   return (
     <header className="flex items-center justify-between px-4 py-2 bg-white border-b">
       <div className="flex items-center gap-4">
@@ -80,6 +84,14 @@ const Header = () => {
             <Button variant="ghost" size="icon">
               <Bell className="w-6 h-6" />
             </Button>
+            <Button
+  variant="outline"
+  className="rounded-full flex items-center gap-2 border-yellow-500 text-yellow-600 hover:bg-yellow-50"
+  onClick={() => setIsSubscriptionOpen(true)}
+>
+  <Crown className="w-4 h-4" />
+  Upgrade
+</Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
@@ -140,6 +152,10 @@ const Header = () => {
         onclose={() => setisdialogeopen(false)}
         mode="create"
       />
+      <SubscriptionDialog
+  open={isSubscriptionOpen}
+  onClose={() => setIsSubscriptionOpen(false)}
+/>
     </header>
   );
 };
