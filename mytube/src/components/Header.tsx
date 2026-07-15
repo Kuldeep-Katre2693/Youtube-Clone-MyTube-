@@ -21,6 +21,7 @@ const Header = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isdialogeopen, setisdialogeopen] = useState(false);
   const [isSubscriptionOpen, setIsSubscriptionOpen] = useState(false);
+  const [subscriptionOpen, setSubscriptionOpen] = useState(false);
   const router = useRouter();
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -81,17 +82,35 @@ const Header = () => {
             <Button variant="ghost" size="icon">
               <VideoIcon className="w-6 h-6" />
             </Button>
+            
             <Button variant="ghost" size="icon">
               <Bell className="w-6 h-6" />
             </Button>
-            <Button
-  variant="outline"
-  className="rounded-full flex items-center gap-2 border-yellow-500 text-yellow-600 hover:bg-yellow-50"
-  onClick={() => setIsSubscriptionOpen(true)}
->
-  <Crown className="w-4 h-4" />
-  Upgrade
-</Button>
+
+{user?.plan === "free" ? (
+  <Button
+    onClick={() => setSubscriptionOpen(true)}
+    className="bg-red-600 hover:bg-red-700 text-white rounded-full"
+  >
+    👑 Upgrade
+  </Button>
+) : (
+  <Button
+    variant="ghost"
+    onClick={() => setSubscriptionOpen(true)}
+    className={`rounded-full px-3 h-9 flex items-center gap-2 font-semibold
+      ${
+        user.plan === "bronze"
+          ? "bg-amber-100 text-amber-700 hover:bg-amber-200"
+          : user.plan === "silver"
+          ? "bg-gray-100 text-gray-700 hover:bg-gray-200"
+          : "bg-yellow-100 text-yellow-700 hover:bg-yellow-200"
+      }`}
+  >
+    <Crown className="w-4 h-4" />
+    {user.plan.charAt(0).toUpperCase() + user.plan.slice(1)}
+  </Button>
+)}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
@@ -155,6 +174,10 @@ const Header = () => {
       <SubscriptionDialog
   open={isSubscriptionOpen}
   onClose={() => setIsSubscriptionOpen(false)}
+/>
+<SubscriptionDialog
+  open={subscriptionOpen}
+  onClose={() => setSubscriptionOpen(false)}
 />
     </header>
   );

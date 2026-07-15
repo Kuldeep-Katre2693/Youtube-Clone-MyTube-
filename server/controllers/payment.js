@@ -1,6 +1,7 @@
 import razorpay from "../config/razorpay.js";
 import crypto from "crypto";
 import users from "../Modals/Auth.js";
+import { sendSubscriptionEmail } from "../services/emailService.js";
 
 export const createOrder = async (req, res) => {
   try {
@@ -51,16 +52,35 @@ export const verifyPayment = async (req, res) => {
       });
     }
 
-    await users.findByIdAndUpdate(userId, {
-  plan,
+  const updatedUser = await users.findByIdAndUpdate(
+  userId,
+  {
+    plan,
+    paymentId: razorpay_payment_id,
+    orderId: razorpay_order_id,
+    subscriptionDate: new Date(),
+  },
+  { new: true }
+);
+
+await sendSubscriptionEmail({
+  email: updatedUser.email,
+  name: updatedUser.name,
+  plan: plan.charAt(0).toUpperCase() + plan.slice(1),
+  amount:
+    plan === "bronze"
+      ? 299
+      : plan === "silver"
+      ? 499
+      : 999,
   paymentId: razorpay_payment_id,
   orderId: razorpay_order_id,
-  subscriptionDate: new Date(),
 });
-    return res.status(200).json({
-      success: true,
-      message: "Payment verified successfully",
-    });
+
+return res.status(200).json({
+  success: true,
+  message: "Payment verified successfully",
+});
   } catch (error) {
     console.log(error);
 
