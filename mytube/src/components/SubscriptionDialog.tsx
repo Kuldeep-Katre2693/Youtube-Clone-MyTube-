@@ -57,19 +57,37 @@ export default function SubscriptionDialog({
         plan: plan.name.toLowerCase(),
       }
     );
+    console.log(
+  "Razorpay Key:",
+  process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID
+);
 
-    const options = {
-      key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+   const options = {
+  key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+  amount: order.amount,
+  currency: order.currency,
+  order_id: order.id,
 
-      amount: order.amount,
+  name: "MyTube",
+  description: `${plan.name} Subscription`,
 
-      currency: order.currency,
+  prefill: {
+    name: user.name,
+    email: user.email,
+  },
 
-      name: "MyTube",
+  modal: {
+    escape: false,
+  },
 
-      description: `${plan.name} Subscription`,
+  retry: {
+    enabled: false,
+  },
 
-      order_id: order.id,
+  theme: {
+    color: "#0059ff",
+  },
+      
 
       handler: async function (response: any) {
         try {
@@ -95,9 +113,7 @@ export default function SubscriptionDialog({
         }
       },
 
-      theme: {
-        color: "#FF0000",
-      },
+    
     };
 
     const razor = new (window as any).Razorpay(options);
