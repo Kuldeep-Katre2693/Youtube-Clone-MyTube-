@@ -13,6 +13,13 @@ const userschema = mongoose.Schema({
   enum: ["free", "bronze", "silver", "gold"],
   default: "free",
 },
+
+theme: {
+  type: String,
+  enum: ["light", "dark"],
+  default: "dark",
+},
+
  paymentId: { type: String },
   orderId: { type: String },
   subscriptionDate: { type: Date },

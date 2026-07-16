@@ -10,8 +10,8 @@ import Script from "next/script";
 export default function App({ Component, pageProps }: AppProps) {
   return (
     <UserProvider>
-      <div className="min-h-screen bg-white text-black">
-        <Head>
+<div className="min-h-screen bg-background text-foreground transition-colors duration-300">
+          <Head>
   <title>MyTube Clone</title>
 </Head>
         <Header />

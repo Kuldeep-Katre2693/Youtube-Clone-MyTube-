@@ -10,7 +10,7 @@ export default function VideoCard({ video }: any) {
   return (
     <Link href={`/watch/${video._id}`} className="group">
       <div className="space-y-3">
-        <div className="relative aspect-video rounded-lg overflow-hidden bg-gray-100">
+        <div className="relative aspect-video rounded-lg overflow-hidden bg-muted transition-colors duration-300">
           <video
             src={videoUrl}
             controls
@@ -35,11 +35,11 @@ export default function VideoCard({ video }: any) {
               {video.videotitle}
             </h3>
 
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-muted-foreground">
               {video.videochanel}
             </p>
 
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-muted-foreground">
               {(video.views ?? 0).toLocaleString()} views •{" "}
               {formatDistanceToNow(new Date(video.createdAt))} ago
             </p>

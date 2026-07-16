@@ -13,61 +13,54 @@ const index = () => {
   const router = useRouter();
   const { id } = router.query;
   const { user } = useUser();
-  // const user: any = {
-  //   id: "1",
-  //   name: "John Doe",
-  //   email: "john@example.com",
-  //   image: "https://github.com/shadcn.png?height=32&width=32",
-  // };
-  try {
+
   const [channel, setChannel] = useState<any>(null);
+  const [videos, setVideos] = useState<any[]>([]);
+
   useEffect(() => {
-  if (!id) return;
+    if (!id) return;
 
-  const fetchChannel = async () => {
-    try {
-      const res = await axiosInstance.get(`/user/${id}`);
-      setChannel(res.data);
-    } catch (error) {
-      console.error(error);
-    }
-  };
+    const fetchChannel = async () => {
+      try {
+        const res = await axiosInstance.get(`/user/${id}`);
+        setChannel(res.data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
 
-  fetchChannel();
-}, [id]);
-    const [videos, setVideos] = useState<any[]>([]);
-    useEffect(() => {
-  const fetchVideos = async () => {
-    try {
-const res = await axiosInstance.get(`/video/channel/${id}`);      setVideos(res.data);
-    } catch (error) {
-      console.error(error);
-    }
-  };
+    fetchChannel();
+  }, [id]);
 
-  fetchVideos();
-}, []);
-if (!channel) {
-  return <div>Loading channel...</div>;
-}
-    return (
-      <div className="flex-1 min-h-screen bg-white">
-        <div className="max-w-full mx-auto">
-          <ChannelHeader channel={channel} user={user} />
-          <Channeltabs />
-          <div className="px-4 pb-8">
-            <VideoUploader channelId={id} channelName={channel?.channelname} />
-          </div>
-          <div className="px-4 pb-8">
-            <ChannelVideos videos={videos} />
-          </div>
+  useEffect(() => {
+    if (!id) return;
+
+    const fetchVideos = async () => {
+      try {
+        const res = await axiosInstance.get(`/video/channel/${id}`);
+        setVideos(res.data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchVideos();
+  }, [id]);
+
+  return (
+    <div className="flex-1 min-h-screen bg-background text-foreground transition-colors duration-300">
+      <div className="max-w-full mx-auto">
+        <ChannelHeader channel={channel} user={user} />
+        <Channeltabs />
+        <div className="px-4 pb-8">
+          <VideoUploader channelId={id} channelName={channel?.channelname} />
+        </div>
+        <div className="px-4 pb-8">
+          <ChannelVideos videos={videos} />
         </div>
       </div>
-    );
-  } catch (error) {
-    console.error("Error fetching channel data:", error);
-   
-  }
+    </div>
+  );
 };
 
 export default index;

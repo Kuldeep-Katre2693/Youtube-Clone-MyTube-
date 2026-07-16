@@ -23,6 +23,14 @@ export const UserProvider = ({ children }) => {
       console.error("Error during sign out:", error);
     }
   };
+  const refreshUser = async (userId) => {
+  try {
+    const response = await axiosInstance.get(`/user/${userId}`);
+    login(response.data);
+  } catch (error) {
+    console.error("Failed to refresh user:", error);
+  }
+};
   const handlegooglesignin = async () => {
     try {
       const result = await signInWithPopup(auth, provider);
@@ -57,10 +65,27 @@ export const UserProvider = ({ children }) => {
     });
     return () => unsubcribe();
   }, []);
+  
+      useEffect(() => {
+  if (!user) return;
+
+  if (user.theme === "dark") {
+    document.documentElement.classList.add("dark");
+  } else {
+    document.documentElement.classList.remove("dark");
+  }
+}, [user]);
 
   return (
-    <UserContext.Provider value={{ user, login, logout, handlegooglesignin }}>
-      {children}
+<UserContext.Provider
+  value={{
+    user,
+    login,
+    logout,
+    handlegooglesignin,
+    refreshUser,
+  }}
+>      {children}
     </UserContext.Provider>
   );
 };
