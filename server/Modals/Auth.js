@@ -23,6 +23,19 @@ theme: {
  paymentId: { type: String },
   orderId: { type: String },
   subscriptionDate: { type: Date },
+  trustedDevices: [
+  {
+    deviceId: String,
+    lastLogin: {
+      type: Date,
+      default: Date.now,
+    },
+  },
+],
+
+otp: String,
+
+otpExpires: Date,
   
 });
 

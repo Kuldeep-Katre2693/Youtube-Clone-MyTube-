@@ -4,11 +4,24 @@ import { createContext } from "react";
 import { provider, auth } from "./firebase";
 import axiosInstance from "./axiosinstance";
 import { useEffect, useContext } from "react";
+import OTPDialog from "../components/OTPDialog";
 
 const UserContext = createContext();
+const getDeviceId = () => {
+  let deviceId = localStorage.getItem("deviceId");
+
+  if (!deviceId) {
+    deviceId = crypto.randomUUID();
+    localStorage.setItem("deviceId", deviceId);
+  }
+
+  return deviceId;
+};
 
 export const UserProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [otpPending, setOtpPending] = useState(false);
+  const [pendingUser, setPendingUser] = useState(null);
 
   const login = (userdata) => {
     setUser(userdata);
@@ -39,21 +52,34 @@ export const UserProvider = ({ children }) => {
         email: firebaseuser.email,
         name: firebaseuser.displayName,
         image: firebaseuser.photoURL || "https://github.com/shadcn.png",
+        deviceId: getDeviceId(),
       };
       const response = await axiosInstance.post("/user/login", payload);
-      login(response.data.result);
+
+if (response.data.otpRequired) {
+  setOtpPending(true);
+  setPendingUser({
+    userId: response.data.userId,
+    deviceId: payload.deviceId,
+  });
+
+  return;
+}
+
+login(response.data.result);
     } catch (error) {
       console.error(error);
     }
   };
   useEffect(() => {
     const unsubcribe = onAuthStateChanged(auth, async (firebaseuser) => {
-      if (firebaseuser) {
+      if (firebaseuser  && !otpPending) {
         try {
           const payload = {
             email: firebaseuser.email,
             name: firebaseuser.displayName,
             image: firebaseuser.photoURL || "https://github.com/shadcn.png",
+              deviceId: getDeviceId(),
           };
           const response = await axiosInstance.post("/user/login", payload);
           login(response.data.result);
@@ -85,8 +111,20 @@ export const UserProvider = ({ children }) => {
     handlegooglesignin,
     refreshUser,
   }}
->      {children}
-    </UserContext.Provider>
+>
+  {children}
+
+  <OTPDialog
+    open={otpPending}
+    pendingUser={pendingUser}
+    onClose={() => setOtpPending(false)}
+    onSuccess={(userData) => {
+      login(userData);
+      setOtpPending(false);
+      setPendingUser(null);
+    }}
+  />
+</UserContext.Provider>
   );
 };
 

@@ -12,6 +12,8 @@ import watchlaterroutes from "./routes/watchlater.js";
 import historyrroutes from "./routes/history.js";
 import commentroutes from "./routes/comment.js";
 import downloadroutes from "./routes/download.js";
+import authRoutes from "./routes/auth.js";
+
 
 const app = express();
 import path from "path";
@@ -31,6 +33,7 @@ app.use("/history", historyrroutes);
 app.use("/comment", commentroutes);
 app.use("/download", downloadroutes);
 app.use("/payment", paymentroutes);
+app.use("/auth", authRoutes);
 
 const PORT = process.env.PORT || 5000;
 
