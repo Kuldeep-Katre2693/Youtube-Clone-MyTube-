@@ -29,6 +29,9 @@ export const UserProvider = ({ children }) => {
   };
   const logout = async () => {
     setUser(null);
+    setOtpPending(false);
+    setPendingUser(null);
+
     localStorage.removeItem("user");
     try {
       await signOut(auth);
@@ -72,25 +75,23 @@ login(response.data.result);
     }
   };
   useEffect(() => {
-    const unsubcribe = onAuthStateChanged(auth, async (firebaseuser) => {
-      if (firebaseuser  && !otpPending) {
-        try {
-          const payload = {
-            email: firebaseuser.email,
-            name: firebaseuser.displayName,
-            image: firebaseuser.photoURL || "https://github.com/shadcn.png",
-              deviceId: getDeviceId(),
-          };
-          const response = await axiosInstance.post("/user/login", payload);
-          login(response.data.result);
-        } catch (error) {
-          console.error(error);
-          logout();
-        }
-      }
-    });
-    return () => unsubcribe();
-  }, []);
+  const unsubscribe = onAuthStateChanged(auth, (firebaseuser) => {
+    if (!firebaseuser) {
+      setUser(null);
+      localStorage.removeItem("user");
+      return;
+    }
+
+    // Restore user from localStorage if available
+    const savedUser = localStorage.getItem("user");
+
+    if (savedUser) {
+      setUser(JSON.parse(savedUser));
+    }
+  });
+
+  return () => unsubscribe();
+}, []);
   
       useEffect(() => {
   if (!user) return;
