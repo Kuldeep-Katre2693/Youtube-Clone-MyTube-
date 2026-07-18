@@ -1,11 +1,11 @@
 import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
-import { Toaster } from "@/components/ui/sonner";
 import "@/styles/globals.css";
 import type { AppProps } from "next/app";
 import { UserProvider } from "../lib/AuthContext";
 import Head from "next/head";
 import Script from "next/script";
+import { Toaster } from "sonner";
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
@@ -15,7 +15,7 @@ export default function App({ Component, pageProps }: AppProps) {
   <title>MyTube Clone</title>
 </Head>
         <Header />
-        <Toaster />
+        <Toaster richColors position="top-right" />
         <div className="flex">
           <Sidebar />
           <Component {...pageProps} />
@@ -25,6 +25,7 @@ export default function App({ Component, pageProps }: AppProps) {
   src="https://checkout.razorpay.com/v1/checkout.js"
   strategy="afterInteractive"
 />
+
     </UserProvider>
   );
 }

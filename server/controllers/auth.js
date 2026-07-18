@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import users from "../Modals/Auth.js";
-import { sendOTPEmail } from "../services/emailService.js";
+import { sendSubscriptionEmail, sendOTPEmail } from "../services/emailService.js";
 
 const getDefaultTheme = () => {
   const now = new Date();
@@ -135,6 +135,43 @@ export const verifyOTP = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Internal server error",
+    });
+  }
+};
+
+export const resendOTP = async (req, res) => {
+  try {
+    const { userId } = req.body;
+
+    const user = await users.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    const otp = generateOTP();
+
+    user.otp = otp;
+    user.otpExpires = new Date(Date.now() + 5 * 60 * 1000);
+
+    await user.save();
+
+    await sendOTPEmail(user.email, otp);
+
+    return res.status(200).json({
+      success: true,
+      message: "OTP sent successfully",
+    });
+  } catch (error) {
+    console.error("Resend OTP Error:",error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to resend OTP",
+      error: error.message,
     });
   }
 };

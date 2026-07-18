@@ -70,6 +70,8 @@ if (response.data.otpRequired) {
 }
 
 login(response.data.result);
+setOtpPending(false);
+setPendingUser(null);
     } catch (error) {
       console.error(error);
     }
@@ -78,6 +80,8 @@ login(response.data.result);
   const unsubscribe = onAuthStateChanged(auth, (firebaseuser) => {
     if (!firebaseuser) {
       setUser(null);
+      setOtpPending(false);
+      setPendingUser(null);
       localStorage.removeItem("user");
       return;
     }
@@ -104,28 +108,34 @@ login(response.data.result);
 }, [user]);
 
   return (
-<UserContext.Provider
-  value={{
-    user,
-    login,
-    logout,
-    handlegooglesignin,
-    refreshUser,
-  }}
->
-  {children}
+    <UserContext.Provider
+      value={{
+        user,
+        login,
+        logout,
+        handlegooglesignin,
+        refreshUser,
+      }}
+    >
+      {children}
 
-  <OTPDialog
-    open={otpPending}
-    pendingUser={pendingUser}
-    onClose={() => setOtpPending(false)}
-    onSuccess={(userData) => {
-      login(userData);
-      setOtpPending(false);
-      setPendingUser(null);
-    }}
-  />
-</UserContext.Provider>
+      {otpPending && (
+        <OTPDialog
+          open={true}
+          pendingUser={pendingUser}
+          onClose={async () => {
+            setOtpPending(false);
+            setPendingUser(null);
+            await logout();
+          }}
+          onSuccess={(userData) => {
+            login(userData);
+            setOtpPending(false);
+            setPendingUser(null);
+          }}
+        />
+      )}
+    </UserContext.Provider>
   );
 };
 
