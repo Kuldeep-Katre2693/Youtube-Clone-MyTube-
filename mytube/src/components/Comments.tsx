@@ -15,11 +15,18 @@ interface Comment {
     name: string;
     image: string;
   };
+
   commentbody: string;
   usercommented: string;
   commentedon: string;
+
   likes: string[];
   dislikes: string[];
+
+  preferredLanguage: string;
+  translatedText?: string;
+  translatedLanguage?: string;
+  
 }
 
 const Comments = ({ videoId }: any) => {
@@ -32,6 +39,7 @@ const Comments = ({ videoId }: any) => {
   const [loading, setLoading] = useState(true);
   const [reportDialogOpen, setReportDialogOpen] = useState(false);
   const [selectedCommentId, setSelectedCommentId] = useState("");
+  const [translatingId, setTranslatingId] = useState("");
   const fetchedComments = [
     {
       _id: "1",
@@ -79,22 +87,10 @@ const Comments = ({ videoId }: any) => {
         commentbody: newComment,
         usercommented: user.name,
       });
-      if (res.data.comment) {
-        const newCommentObj: Comment = {
-  _id: Date.now().toString(),
-  videoid: videoId,
-  userid: {
-    _id: user._id,
-    name: user.name || "Anonymous",
-    image: user.image || "",
-  },
-  commentbody: newComment,
-  usercommented: user.name || "Anonymous",
-  commentedon: new Date().toISOString(),
-  likes: [],
-  dislikes: [],
-};
-        setComments([newCommentObj, ...comments]);
+     if (res.data.comment) {
+  await loadComments();
+
+       setNewComment("");
       }
       setNewComment("");
     } catch (error) {
@@ -241,6 +237,35 @@ const handleReport = async (reason: string) => {
   }
 };
 
+const handleTranslate = async (commentId: string) => {
+  try {
+    setTranslatingId(commentId);
+
+   const res = await axiosInstance.post(
+  `/comment/translate/${commentId}`,
+  {
+    targetLanguage: user?.preferredLanguage || "en",
+  }
+);
+
+    setComments((prev) =>
+      prev.map((comment) =>
+        comment._id === commentId
+          ? {
+              ...comment,
+              translatedText: res.data.translatedText,
+              translatedLanguage: "en",
+            }
+          : comment
+      )
+    );
+  } catch (error) {
+    console.log(error);
+  } finally {
+    setTranslatingId("");
+  }
+};
+
   return (
     <div className="space-y-6">
       <h2 className="text-xl font-semibold">{comments.length} Comments</h2>
@@ -324,7 +349,21 @@ const handleReport = async (reason: string) => {
                   </div>
                 ) : (
                  <>
-  <p className="text-sm">{comment.commentbody}</p>
+  <p className="text-sm">
+  {comment.commentbody}
+  </p>
+
+  {comment.translatedText && (
+  <div className="mt-2 rounded-lg bg-gray-100 dark:bg-gray-800 p-3">
+    <p className="text-xs text-gray-500 mb-1">
+      Translated
+    </p>
+
+    <p className="text-sm">
+      {comment.translatedText}
+    </p>
+  </div>
+)}
 
   <div className="flex items-center gap-4 mt-2 text-sm text-gray-600">
 
@@ -357,6 +396,16 @@ const handleReport = async (reason: string) => {
       />
       {comment.dislikes.length}
     </button>
+
+    <button
+  onClick={() => handleTranslate(comment._id)}
+  disabled={translatingId === comment._id}
+  className="text-blue-600 hover:underline"
+>
+  {translatingId === comment._id
+    ? "Translating..."
+    : "🌍 Translate"}
+</button>
 
     
    {comment.userid._id !== user?._id && (

@@ -1,6 +1,7 @@
 import comment from "../Modals/comment.js";
 import mongoose from "mongoose";
 import { validateComment } from "../middleware/commentFilter.js";
+import translate from "translate-google-api";
 
 export const postcomment = async (req, res) => {
   const commentdata = req.body;
@@ -201,6 +202,59 @@ export const reportComment = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Something went wrong.",
+    });
+  }
+};
+
+export const translateComment = async (req, res) => {
+  try {
+    const { commentId } = req.params;
+    const { targetLanguage } = req.body;
+
+    const commentData = await comment.findById(commentId);
+
+    if (!commentData) {
+      return res.status(404).json({
+        success: false,
+        message: "Comment not found",
+      });
+    }
+
+    // Return cached translation if it already exists
+    if (
+      commentData.translatedText &&
+      commentData.translatedLanguage === targetLanguage
+    ) {
+      return res.status(200).json({
+        success: true,
+        translatedText: commentData.translatedText,
+        cached: true,
+      });
+    }
+
+    const result = await translate(commentData.commentbody, {
+  to: targetLanguage,
+});
+
+const translated = Array.isArray(result) ? result.join(" ") : result;
+
+    commentData.translatedText = translated;
+    commentData.translatedLanguage = targetLanguage;
+
+    await commentData.save();
+
+    return res.status(200).json({
+      success: true,
+      translatedText: translated,
+      cached: false,
+    });
+
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Translation failed",
     });
   }
 };

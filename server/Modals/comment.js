@@ -42,10 +42,17 @@ const commentschema = mongoose.Schema(
       default: "",
     },
 
+    translatedLanguage: {
+  type: String,
+  default: "",
+},
+
     locationVisible: {
       type: Boolean,
       default: false,
     },
+
+ 
 
     likes: [
       {

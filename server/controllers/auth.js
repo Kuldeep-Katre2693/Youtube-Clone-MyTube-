@@ -254,3 +254,64 @@ export const getUserById = async (req, res) => {
     });
   }
 };
+
+export const updatePreferredLanguage = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { preferredLanguage } = req.body;
+
+    const validLanguages = [
+      "en",
+      "hi",
+      "mr",
+      "ta",
+      "te",
+      "ml",
+      "kn",
+      "gu",
+      "bn",
+      "pa",
+      "ur",
+      "es",
+      "fr",
+      "de",
+      "ja",
+      "ko",
+      "zh",
+    ];
+
+    if (!validLanguages.includes(preferredLanguage)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid language selected.",
+      });
+    }
+
+    const updatedUser = await users.findByIdAndUpdate(
+      id,
+      { preferredLanguage },
+      { new: true }
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found.",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Preferred language updated successfully.",
+      user: updatedUser,
+    });
+
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Something went wrong.",
+    });
+  }
+};

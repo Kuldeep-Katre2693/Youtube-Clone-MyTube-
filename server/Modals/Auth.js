@@ -7,6 +7,10 @@ const userschema = mongoose.Schema({
   description: { type: String },
   image: { type: String },
   joinedon: { type: Date, default: Date.now },
+  preferredLanguage: {
+  type: String,
+  default: "en",
+},
 
   plan: {
   type: String,
