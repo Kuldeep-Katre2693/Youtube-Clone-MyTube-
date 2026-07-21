@@ -1,5 +1,4 @@
 import "dotenv/config";
-
 import express from "express";
 import cors from "cors";
 import bodyParser from "body-parser";
@@ -13,7 +12,10 @@ import historyrroutes from "./routes/history.js";
 import commentroutes from "./routes/comment.js";
 import downloadroutes from "./routes/download.js";
 import authRoutes from "./routes/auth.js";
-
+import watchPartyRoutes from "./routes/watchParty.js";
+import http from "http";
+import { Server } from "socket.io";
+import { initializeSocket } from "./socket/socket.js";
 
 const app = express();
 import path from "path";
@@ -34,11 +36,21 @@ app.use("/comment", commentroutes);
 app.use("/download", downloadroutes);
 app.use("/payment", paymentroutes);
 app.use("/auth", authRoutes);
+app.use("/watch-party", watchPartyRoutes);
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
-  console.log(`server running on port ${PORT}`);
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"],
+  },
+});
+initializeSocket(io);
+
+server.listen(PORT, () => {
+  console.log(`Server running on ${PORT}`);
 });
 
 const DBURL = process.env.DB_URL;
