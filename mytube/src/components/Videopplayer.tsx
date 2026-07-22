@@ -9,6 +9,7 @@ import {
   Volume2,
   Maximize,
 } from "lucide-react";
+import { socket } from "@/socket/socket";
 
 interface VideoPlayerProps {
   video: {
@@ -21,9 +22,13 @@ interface VideoPlayerProps {
     _id: string;
     videotitle: string;
   } | null;
+
+   isWatchParty?: boolean;
+  partyCode?: string;
 }
 
-export default function VideoPlayer({ video, nextVideo, }: VideoPlayerProps) {
+export default function VideoPlayer({ video, nextVideo, isWatchParty = false,
+  partyCode, }: VideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const playerRef = useRef<HTMLDivElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -36,15 +41,29 @@ export default function VideoPlayer({ video, nextVideo, }: VideoPlayerProps) {
   const [lastTap, setLastTap] = useState(0);
   const router = useRouter();
 
-  const togglePlay = () => {
+const togglePlay = () => {
   if (!videoRef.current) return;
 
   if (videoRef.current.paused) {
     videoRef.current.play();
     setIsPlaying(true);
+
+    if (isWatchParty) {
+      socket.emit("play-video", {
+        partyCode,
+        currentTime: videoRef.current.currentTime,
+      });
+    }
   } else {
     videoRef.current.pause();
     setIsPlaying(false);
+
+    if (isWatchParty) {
+      socket.emit("pause-video", {
+        partyCode,
+        currentTime: videoRef.current.currentTime,
+      });
+    }
   }
 };
 
@@ -158,6 +177,50 @@ const formatTime = (time: number) => {
 
   return `${minutes}:${seconds.toString().padStart(2, "0")}`;
 };
+
+useEffect(() => {
+  if (!isWatchParty) return;
+  if (!videoRef.current) return;
+
+ const handlePlay = async ({ currentTime }: { currentTime: number }) => {
+  console.log("Received play event", currentTime);
+
+  if (!videoRef.current) {
+    console.log("videoRef is null");
+    return;
+  }
+
+  console.log("Before play()");
+  console.log("readyState:", videoRef.current.readyState);
+  console.log("paused:", videoRef.current.paused);
+
+  videoRef.current.currentTime = currentTime;
+
+  try {
+    await videoRef.current.play();
+    console.log("✅ play() succeeded");
+    setIsPlaying(true);
+  } catch (err) {
+    console.error("❌ play() failed", err);
+  }
+};
+
+  const handlePause = ({ currentTime }: { currentTime: number }) => {
+    if (!videoRef.current) return;
+
+    videoRef.current.currentTime = currentTime;
+    videoRef.current.pause();
+    setIsPlaying(false);
+  };
+
+  socket.on("play-video", handlePlay);
+  socket.on("pause-video", handlePause);
+
+  return () => {
+    socket.off("play-video", handlePlay);
+    socket.off("pause-video", handlePause);
+  };
+}, [isWatchParty]);
   
   return (
 <div

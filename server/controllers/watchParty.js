@@ -100,3 +100,33 @@ export const joinWatchParty = async (req, res) => {
     });
   }
 };
+
+export const getWatchParty = async (req, res) => {
+  try {
+    const { partyCode } = req.params;
+
+    const party = await WatchParty.findOne({ partyCode })
+      .populate("host")
+      .populate("video")
+      .populate("participants");
+
+    if (!party) {
+      return res.status(404).json({
+        success: false,
+        message: "Watch party not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      party,
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+};
