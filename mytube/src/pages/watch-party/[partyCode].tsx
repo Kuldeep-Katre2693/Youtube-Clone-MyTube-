@@ -1,15 +1,20 @@
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import axiosInstance from "@/lib/axiosinstance";
-import Videopplayer from "@/components/Videopplayer";
+import Videoplayer from "@/components/Videoplayer";
 import { socket } from "@/socket/socket";
+import ChatPanel from "@/components/ChatPanel";
+import { useUser } from "@/lib/AuthContext";
 
 export default function WatchPartyPage() {
   const router = useRouter();
   const { partyCode } = router.query;
+  const { user } = useUser();
 
   const [party, setParty] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [messages, setMessages] = useState<any[]>([]);
+const [chatMessage, setChatMessage] = useState("");
 
   useEffect(() => {
     if (!partyCode) return;
@@ -58,12 +63,20 @@ export default function WatchPartyPage() {
         Watch Party
       </h1>
 
-      <Videopplayer
-        video={party.video}
-        nextVideo={null}
-        isWatchParty={true}
-        partyCode={party.partyCode}
-      />
+      <div className="grid grid-cols-3 gap-6">
+  <div className="col-span-2">
+    <Videoplayer
+      video={party.video}
+      nextVideo={null}
+      isWatchParty
+      partyCode={party.partyCode}
+    />
+  </div>
+
+  <div>
+    <ChatPanel partyCode={party.partyCode} user={user} />
+  </div>
+</div>
     </div>
   );
 }

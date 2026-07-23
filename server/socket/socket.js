@@ -10,6 +10,14 @@ export const initializeSocket = (io) => {
       );
     });
 
+    socket.on("send-message", ({ partyCode, message }) => {
+  io.to(partyCode).emit("receive-message", message);
+
+  console.log(
+    `Message in ${partyCode}: ${message.sender} -> ${message.text}`
+  );
+});
+
     socket.on("play-video", ({ partyCode, currentTime }) => {
   socket.to(partyCode).emit("play-video", {
     currentTime,
@@ -24,6 +32,15 @@ export const initializeSocket = (io) => {
     `Pause event sent to room ${partyCode} at ${currentTime}s`
   );
 });
+socket.on("seek-video", ({ partyCode, currentTime }) => {
+  socket.to(partyCode).emit("seek-video", {
+    currentTime,
+  });
+
+  console.log(
+    `Seek event sent to room ${partyCode} at ${currentTime}s`
+  );
+});
 
   console.log(
     `Play event sent to room ${partyCode} at ${currentTime}s`
@@ -34,4 +51,6 @@ export const initializeSocket = (io) => {
       console.log("User disconnected:", socket.id);
     });
   });
+  
 };
+

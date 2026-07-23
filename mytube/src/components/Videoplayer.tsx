@@ -212,16 +212,25 @@ useEffect(() => {
     videoRef.current.pause();
     setIsPlaying(false);
   };
+  const handleSeek = ({ currentTime }: { currentTime: number }) => {
+  if (!videoRef.current) return;
+
+  videoRef.current.currentTime = currentTime;
+  setCurrentTime(currentTime);
+};
 
   socket.on("play-video", handlePlay);
   socket.on("pause-video", handlePause);
+  socket.on("seek-video", handleSeek);
 
   return () => {
     socket.off("play-video", handlePlay);
     socket.off("pause-video", handlePause);
+    socket.off("seek-video", handleSeek);
   };
 }, [isWatchParty]);
-  
+
+
   return (
 <div
   ref={playerRef}
@@ -255,12 +264,21 @@ onEnded={() => {
       min={0}
       max={duration || 0}
       value={currentTime}
-      onChange={(e) => {
-        if (!videoRef.current) return;
+     onChange={(e) => {
+  if (!videoRef.current) return;
 
-        videoRef.current.currentTime = Number(e.target.value);
-        setCurrentTime(Number(e.target.value));
-      }}
+  const newTime = Number(e.target.value);
+
+  videoRef.current.currentTime = newTime;
+  setCurrentTime(newTime);
+
+  if (isWatchParty) {
+    socket.emit("seek-video", {
+      partyCode,
+      currentTime: newTime,
+    });
+  }
+}}
 className="w-full accent-red-600 cursor-pointer"    />
 
     <div className="flex items-center justify-between text-white text-sm font-medium mt-3">
@@ -371,6 +389,7 @@ className="w-24 accent-red-600 cursor-pointer"        />
     </div>
   </div>
 )}
+
     </div>
   );
 }
