@@ -5,6 +5,7 @@ import Videoplayer from "@/components/Videoplayer";
 import { socket } from "@/socket/socket";
 import ChatPanel from "@/components/ChatPanel";
 import { useUser } from "@/lib/AuthContext";
+import ParticipantsPanel from "@/components/ParticipantsPanel";
 
 export default function WatchPartyPage() {
   const router = useRouter();
@@ -13,8 +14,10 @@ export default function WatchPartyPage() {
 
   const [party, setParty] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const isHost = !!party && user?._id === party.host._id;
   const [messages, setMessages] = useState<any[]>([]);
-const [chatMessage, setChatMessage] = useState("");
+  const [chatMessage, setChatMessage] = useState("");
+ 
 
   useEffect(() => {
     if (!partyCode) return;
@@ -37,21 +40,36 @@ const [chatMessage, setChatMessage] = useState("");
   }, [partyCode]);
   
   useEffect(() => {
-  if (!party) return;
+  if (!party || !user) return;
 
   if (!socket.connected) {
     socket.connect();
   }
 
-  socket.emit("join-party", party.partyCode);
+  console.log("Joining as:", user);
+
+  socket.emit("join-party", {
+    partyCode: party.partyCode,
+    user: {
+      _id: user._id,
+      name: user.name,
+      image: user.image,
+    },
+  });
 
   console.log("Joined room:", party.partyCode);
 
   return () => {
     socket.emit("leave-party", party.partyCode);
+
+  };
+}, [party, user]);
+
+useEffect(() => {
+  return () => {
     socket.disconnect();
   };
-}, [party]);
+}, []);
 
   if (loading) return <div>Loading...</div>;
 
@@ -65,17 +83,28 @@ const [chatMessage, setChatMessage] = useState("");
 
       <div className="grid grid-cols-3 gap-6">
   <div className="col-span-2">
+   
     <Videoplayer
       video={party.video}
       nextVideo={null}
       isWatchParty
       partyCode={party.partyCode}
+      isHost={isHost}
     />
   </div>
 
-  <div>
-    <ChatPanel partyCode={party.partyCode} user={user} />
-  </div>
+  <div className="space-y-6">
+
+    <ParticipantsPanel
+        partyCode={party.partyCode}
+        hostId={party.host._id}
+    />
+
+    <ChatPanel
+        partyCode={party.partyCode}
+    />
+
+</div>
 </div>
     </div>
   );

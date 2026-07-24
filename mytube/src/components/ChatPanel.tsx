@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { socket } from "@/socket/socket";
+import { useUser } from "@/lib/AuthContext";
 
 interface ChatMessage {
   sender: string;
@@ -16,10 +17,12 @@ interface ChatPanelProps {
   } | null;
 }
 
-export default function ChatPanel({ partyCode, user }: ChatPanelProps) {
+export default function ChatPanel({ partyCode }: ChatPanelProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [chatMessage, setChatMessage] = useState("");
-  const senderName = user?.name || user?.email || "Anonymous";
+  const { user } = useUser();
+    const senderName = user?.name || user?.email || "Anonymous";
+
 
   useEffect(() => {
     const handleMessage = (message: ChatMessage) => {
@@ -39,7 +42,7 @@ export default function ChatPanel({ partyCode, user }: ChatPanelProps) {
     socket.emit("send-message", {
       partyCode,
       message: {
-        sender: senderName,
+        sender: user?.name || "Guest",
         text: chatMessage,
         time: new Date().toLocaleTimeString(),
       },
