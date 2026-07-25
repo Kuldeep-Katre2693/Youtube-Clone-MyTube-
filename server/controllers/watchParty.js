@@ -1,4 +1,4 @@
-import WatchParty from "../Modals/WatchParty.js";
+import WatchParty from "../Models/watchParty.js";
 
 const generatePartyCode = () => {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -21,6 +21,19 @@ export const createWatchParty = async (req, res) => {
         message: "Host ID and Video ID are required",
       });
     }
+    const existingParty = await WatchParty.findOne({
+  host: hostId,
+  video: videoId,
+  isActive: true,
+});
+
+if (existingParty) {
+  return res.status(200).json({
+    success: true,
+    message: "Active watch party already exists",
+    party: existingParty,
+  });
+}
 
     let partyCode = generatePartyCode();
 
@@ -127,6 +140,36 @@ export const getWatchParty = async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Internal Server Error",
+    });
+  }
+};
+
+export const getChatHistory = async (req, res) => {
+  try {
+    const { partyCode } = req.params;
+
+    const party = await WatchParty.findOne({ partyCode });
+
+    if (!party) {
+      return res.status(404).json({
+        success: false,
+        message: "Watch party not found",
+      });
+    }
+
+    const messages = await WatchPartyMessage.find({
+      party: party._id,
+    }).sort({ createdAt: 1 });
+
+    res.status(200).json({
+      success: true,
+      messages,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      success: false,
+      message: "Failed to load chat history",
     });
   }
 };

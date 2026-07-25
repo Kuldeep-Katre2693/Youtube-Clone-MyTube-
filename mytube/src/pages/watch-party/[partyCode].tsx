@@ -6,6 +6,8 @@ import { socket } from "@/socket/socket";
 import ChatPanel from "@/components/ChatPanel";
 import { useUser } from "@/lib/AuthContext";
 import ParticipantsPanel from "@/components/ParticipantsPanel";
+import { Copy } from "lucide-react";
+import { toast } from "sonner";
 
 export default function WatchPartyPage() {
   const router = useRouter();
@@ -17,6 +19,29 @@ export default function WatchPartyPage() {
   const isHost = !!party && user?._id === party.host._id;
   const [messages, setMessages] = useState<any[]>([]);
   const [chatMessage, setChatMessage] = useState("");
+
+  const copyPartyCode = async () => {
+  try {
+    await navigator.clipboard.writeText(party.partyCode);
+    toast.success("Party code copied!");
+  } catch (err) {
+    console.error(err);
+    toast.error("Failed to copy party code");
+  }
+};
+
+const copyInviteLink = async () => {
+  try {
+    const inviteLink = `${window.location.origin}/watch-party/${party.partyCode}`;
+
+    await navigator.clipboard.writeText(inviteLink);
+
+    toast.success("Invite link copied!");
+  } catch (err) {
+    console.error(err);
+    toast.error("Failed to copy invite link");
+  }
+};
  
 
   useEffect(() => {
@@ -77,9 +102,38 @@ useEffect(() => {
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">
-        Watch Party
-      </h1>
+      <div className="flex items-center justify-between mb-4">
+  <h1 className="text-2xl font-bold">
+    🎉 Watch Party
+  </h1>
+
+<div className="bg-gray-100 px-4 py-2 rounded-lg flex items-center gap-4">
+  <div>
+    <span className="text-sm text-gray-500">
+      Party Code
+    </span>
+
+    <p className="font-bold tracking-widest">
+      {party.partyCode}
+    </p>
+  </div>
+
+  <button
+    onClick={copyPartyCode}
+    className="p-2 rounded-md hover:bg-gray-200 transition"
+    title="Copy Party Code"
+  >
+    <Copy className="w-5 h-5" />
+  </button>
+  <button
+  onClick={copyInviteLink}
+  className="p-2 rounded-md hover:bg-gray-200 transition"
+  title="Copy Invite Link"
+>
+  🔗
+</button>
+</div>
+</div>
 
       <div className="grid grid-cols-3 gap-6">
   <div className="col-span-2">

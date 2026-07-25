@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import users from "../Modals/Auth.js";
+import users from "../Models/Auth.js";
 import { sendSubscriptionEmail, sendOTPEmail } from "../services/emailService.js";
 
 const getDefaultTheme = () => {

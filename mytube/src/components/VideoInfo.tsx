@@ -8,7 +8,9 @@
     Share,
     ThumbsDown,
     ThumbsUp,
+    Users
   } from "lucide-react";
+  import { useRouter } from "next/router";
   import { formatDistanceToNow } from "date-fns";
   import { useUser } from "@/lib/AuthContext";
   import axiosInstance from "@/lib/axiosinstance";
@@ -21,7 +23,9 @@
     const [isDisliked, setIsDisliked] = useState(false);
     const [showFullDescription, setShowFullDescription] = useState(false);
     const { user } = useUser();
+    const router = useRouter();
     const [isWatchLater, setIsWatchLater] = useState(false);
+    
 
     
     useEffect(() => {
@@ -148,6 +152,33 @@ fetch(fileUrl)
     }
   };
 
+  const handleStartWatchParty = async () => {
+  if (!user) {
+    toast.error("Please login first.");
+    return;
+  }
+
+  try {
+    const res = await axiosInstance.post("/watch-party/create", {
+      hostId: user._id,
+      videoId: video._id,
+    });
+    console.log(res.data);
+    toast.success("Watch Party Created!");
+
+    router.push(
+      `/watch-party/${res.data.party.partyCode}`
+    );
+  } catch (error: any) {
+    console.error(error);
+
+    toast.error(
+      error.response?.data?.message ||
+        "Failed to create Watch Party"
+    );
+  }
+};
+
   return (
     <div className="space-y-4">
         <h1 className="text-xl font-semibold">{video.videotitle}</h1>
@@ -212,6 +243,15 @@ fetch(fileUrl)
               <Share className="w-5 h-5 mr-2" />
               Share
             </Button>
+            <Button
+  variant="ghost"
+  size="sm"
+  className="bg-gray-100 rounded-full"
+  onClick={handleStartWatchParty}
+>
+  <Users className="w-5 h-5 mr-2" />
+  Watch Party
+</Button>
             <Button
               variant="ghost"
               size="sm"
