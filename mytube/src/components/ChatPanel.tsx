@@ -3,9 +3,10 @@ import { socket } from "@/socket/socket";
 import { useUser } from "@/lib/AuthContext";
 import axiosInstance from "@/lib/axiosinstance";
 import axios from "axios";
-
+import { format } from "date-fns";
 interface ChatMessage {
-  sender: string;
+  sender: any;
+  senderName?: string;
   text: string;
   time: string;
   type?: "chat" | "join" | "leave";
@@ -38,31 +39,6 @@ export default function ChatPanel({ partyCode }: ChatPanelProps) {
   };
 
   loadMessages();
-}, [partyCode]);
-
-  useEffect(() => {
-  if (!partyCode) return;
-
-  const fetchMessages = async () => {
-    try {
-      const res = await axiosInstance.get(
-        `/watch-party/${partyCode}/messages`
-      );
-
-      setMessages(
-        res.data.map((msg: any) => ({
-          sender: msg.senderName,
-          text: msg.text,
-          type: msg.type,
-          time: new Date(msg.createdAt).toLocaleTimeString(),
-        }))
-      );
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  fetchMessages();
 }, [partyCode]);
 
 
@@ -102,6 +78,7 @@ useEffect(() => {
     socket.emit("send-message", {
       partyCode,
       message: {
+          senderId: user?._id,
         sender: user?.name || "Guest",
         text: chatMessage,
         time: new Date().toLocaleTimeString(),
@@ -116,6 +93,9 @@ useEffect(() => {
       <h2 className="font-bold mb-3">Live Chat</h2>
 <div className="h-64 overflow-y-auto border rounded p-2 mb-3">
   {messages.map((msg: any, index: number) => {
+    const isOwnMessage =
+  String(msg.sender?._id || msg.sender) === String(user?._id);
+    
     if (msg.type === "join") {
       return (
         <div
@@ -139,10 +119,42 @@ useEffect(() => {
     }
 
     return (
-      <div key={index} className="mb-2">
-        <strong>{msg.sender}</strong>
-        <p>{msg.text}</p>
-      </div>
+<div
+  key={index}
+className={`flex mb-3 ${
+  isOwnMessage ? "justify-end" : "justify-start"
+}`}
+>
+  <div
+    className={`max-w-[75%] rounded-xl px-4 py-2 ${
+  isOwnMessage
+    ? "bg-red-600 text-white"
+    : "bg-gray-100 text-black"
+}`}
+  >
+    <div className="flex items-center justify-between">
+      <strong className="text-sm font-semibold">
+        {isOwnMessage ? "You" : msg.senderName}
+      </strong>
+
+      <span
+       className={`text-xs ${
+  isOwnMessage
+    ? "text-red-100"
+    : "text-gray-500"
+}`}
+      >
+        {msg.createdAt
+          ? format(new Date(msg.createdAt), "hh:mm a")
+          : ""}
+      </span>
+    </div>
+
+    <p className="mt-1 break-words">
+      {msg.text}
+    </p>
+  </div>
+</div>
     );
   })}
 

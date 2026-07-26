@@ -20,8 +20,8 @@ console.log("Socket:", socket.id);
       }
 
       const exists = activeRooms[partyCode].find(
-        (u) => u.socketId === socket.id
-      );
+  (u) => u.userId === user._id
+);
 
       if (!exists) {
         activeRooms[partyCode].push({
@@ -30,18 +30,19 @@ console.log("Socket:", socket.id);
           name: user.name,
           image: user.image,
         });
-      }
+      
 
       io.to(partyCode).emit(
         "participants-update",
         activeRooms[partyCode]
      
       );
-    socket  .to(partyCode).emit("system-message", {
+    socket.to(partyCode).emit("system-message", {
     type: "join",
     text: `${user.name} joined the watch party`,
     time: new Date().toLocaleTimeString(),
 });
+      }
       console.log("Current participants:", activeRooms[partyCode]);
     });
 
@@ -61,7 +62,8 @@ console.log("Socket:", socket.id);
 
     io.to(partyCode).emit("receive-message", {
       _id: savedMessage._id,
-      sender: savedMessage.senderName,
+      sender: savedMessage.sender,
+      senderName: savedMessage.senderName,
       text: savedMessage.text,
       type: savedMessage.type,
       createdAt: savedMessage.createdAt,
@@ -100,6 +102,10 @@ console.log("Socket:", socket.id);
         `Seek event sent to room ${partyCode} at ${currentTime}s`
       );
     });
+
+    socket.on("end-party", ({ partyCode }) => {
+  io.to(partyCode).emit("party-ended");
+});
 
    socket.on("disconnect", () => {
   console.log("User disconnected:", socket.id);

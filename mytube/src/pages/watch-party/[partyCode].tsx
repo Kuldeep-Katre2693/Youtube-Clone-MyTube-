@@ -15,7 +15,6 @@ export default function WatchPartyPage() {
   const { user } = useUser();
 
   const [party, setParty] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
   const isHost = !!party && user?._id === party.host._id;
   const [messages, setMessages] = useState<any[]>([]);
   const [chatMessage, setChatMessage] = useState("");
@@ -27,6 +26,23 @@ export default function WatchPartyPage() {
   } catch (err) {
     console.error(err);
     toast.error("Failed to copy party code");
+  }
+};
+
+const handleEndParty = async () => {
+  try {
+    await axiosInstance.post(
+      `/watch-party/${partyCode}/end`,
+      {
+        hostId: user?._id,
+      }
+    );
+
+    socket.emit("end-party", {
+      partyCode,
+    });
+  } catch (err) {
+    console.error(err);
   }
 };
 
@@ -48,18 +64,20 @@ const copyInviteLink = async () => {
     if (!partyCode) return;
 
     const fetchParty = async () => {
-      try {
-        const res = await axiosInstance.get(
-          `/watch-party/${partyCode}`
-        );
+  try {
+    const res = await axiosInstance.get(`/watch-party/${partyCode}`);
 
-        setParty(res.data.party);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
+    setParty(res.data.party);
+  } catch (err: any) {
+    if (err.response?.status === 410) {
+      toast.error("This watch party has ended.");
+      router.push("/");
+      return;
+    }
+
+    console.error(err);
+  } 
+};
 
     fetchParty();
   }, [partyCode]);
@@ -91,12 +109,25 @@ const copyInviteLink = async () => {
 }, [party, user]);
 
 useEffect(() => {
+  const handlePartyEnded = () => {
+    toast.success("The host has ended the watch party.");
+
+    router.push("/");
+  };
+
+  socket.on("party-ended", handlePartyEnded);
+
+  return () => {
+    socket.off("party-ended", handlePartyEnded);
+  };
+}, [router]);
+
+useEffect(() => {
   return () => {
     socket.disconnect();
   };
 }, []);
 
-  if (loading) return <div>Loading...</div>;
 
   if (!party) return <div>Party not found</div>;
 
@@ -117,6 +148,15 @@ useEffect(() => {
       {party.partyCode}
     </p>
   </div>
+
+  {isHost && (
+  <button
+  onClick={handleEndParty}
+    className="mt-3 w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg transition"
+  >
+    End Watch Party
+  </button>
+)}
 
   <button
     onClick={copyPartyCode}

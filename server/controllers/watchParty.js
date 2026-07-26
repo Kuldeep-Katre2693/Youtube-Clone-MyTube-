@@ -122,6 +122,12 @@ export const getWatchParty = async (req, res) => {
       .populate("host")
       .populate("video")
       .populate("participants");
+      if (!party.isActive) {
+  return res.status(410).json({
+    success: false,
+    message: "This watch party has ended.",
+  });
+}
 
     if (!party) {
       return res.status(404).json({
@@ -170,6 +176,44 @@ export const getChatHistory = async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Failed to load chat history",
+    });
+  }
+};
+
+export const endWatchParty = async (req, res) => {
+  try {
+    const { partyCode } = req.params;
+    const { hostId } = req.body;
+
+    const party = await WatchParty.findOne({ partyCode });
+
+    if (!party) {
+      return res.status(404).json({
+        success: false,
+        message: "Watch party not found",
+      });
+    }
+
+    if (String(party.host) !== String(hostId)) {
+      return res.status(403).json({
+        success: false,
+        message: "Only the host can end the watch party",
+      });
+    }
+
+    party.isActive = false;
+    await party.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Watch party ended successfully",
+    });
+  } catch (err) {
+    console.error(err);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to end watch party",
     });
   }
 };
