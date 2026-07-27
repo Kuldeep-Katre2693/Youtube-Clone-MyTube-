@@ -1,5 +1,5 @@
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import axiosInstance from "@/lib/axiosinstance";
 import Videoplayer from "@/components/Videoplayer";
 import { socket } from "@/socket/socket";
@@ -8,6 +8,7 @@ import { useUser } from "@/lib/AuthContext";
 import ParticipantsPanel from "@/components/ParticipantsPanel";
 import { Copy } from "lucide-react";
 import { toast } from "sonner";
+import LocalVideo from "@/components/LocalVideo";
 
 export default function WatchPartyPage() {
   const router = useRouter();
@@ -18,6 +19,11 @@ export default function WatchPartyPage() {
   const isHost = !!party && user?._id === party.host._id;
   const [messages, setMessages] = useState<any[]>([]);
   const [chatMessage, setChatMessage] = useState("");
+  const peerConnection = useRef<RTCPeerConnection | null>(null);
+  const [localStream, setLocalStream] = useState<MediaStream | null>(null);
+  const remoteSocketId = useRef<string | null>(null);
+  const [remoteSocket, setRemoteSocket] = useState<string | null>(null);
+
 
   const copyPartyCode = async () => {
   try {
@@ -90,7 +96,7 @@ const copyInviteLink = async () => {
   }
 
   console.log("Joining as:", user);
-
+console.log("HOST emitting join-party");
   socket.emit("join-party", {
     partyCode: party.partyCode,
     user: {
@@ -107,6 +113,121 @@ const copyInviteLink = async () => {
 
   };
 }, [party, user]);
+
+  useEffect(() => {
+  if (!localStream || peerConnection.current) return;
+
+  const pc = new RTCPeerConnection({
+    iceServers: [
+      {
+        urls: "stun:stun.l.google.com:19302",
+      },
+    ],
+  });
+
+  localStream.getTracks().forEach((track) => {
+    pc.addTrack(track, localStream);
+  });
+
+  peerConnection.current = pc;
+  if (remoteSocketId.current) {
+  console.log("Remote already exists:", remoteSocketId.current);
+}
+    console.log("RTCPeerConnection created on host");
+  console.log("Remote socket:", remoteSocketId.current);
+
+  console.log("RTCPeerConnection created");
+}, [localStream]);
+
+useEffect(() => {
+  if (localStream) {
+    console.log("Local stream ready", localStream);
+      console.log("localStream changed:", localStream);
+
+  }
+}, [localStream]);
+
+useEffect(() => {
+  const handleUserJoined = (user: any) => {
+    console.log("User joined:", user);
+     remoteSocketId.current = user.socketId;
+    setRemoteSocket(user.socketId);
+  };
+
+  socket.on("user-joined-call", handleUserJoined);
+
+  return () => {
+    socket.off("user-joined-call", handleUserJoined);
+  };
+}, []);
+
+useEffect(() => {
+  const startOffer = async () => {
+    if (!peerConnection.current) return;
+    if (!remoteSocket) return;
+
+    console.log("Creating offer...");
+
+    const offer = await peerConnection.current.createOffer();
+
+    await peerConnection.current.setLocalDescription(offer);
+
+    socket.emit("webrtc-offer", {
+      offer,
+      target: remoteSocket,
+    });
+
+    console.log("Offer sent");
+  };
+
+  startOffer();
+}, [remoteSocket]);
+
+useEffect(() => {
+  const handleOffer = async ({
+    offer,
+    sender,
+  }: {
+    offer: RTCSessionDescriptionInit;
+    sender: string;
+  }) => {
+    console.log("Offer received");
+
+    remoteSocketId.current = sender;
+
+    if (!peerConnection.current) return;
+
+    await peerConnection.current.setRemoteDescription(
+      new RTCSessionDescription(offer)
+    );
+
+    console.log("Remote description set");
+
+    const answer =
+      await peerConnection.current.createAnswer();
+
+    console.log("Answer created");
+
+    await peerConnection.current.setLocalDescription(
+      answer
+    );
+
+    console.log("Local description set");
+
+    socket.emit("webrtc-answer", {
+      answer,
+      target: sender,
+    });
+
+    console.log("Answer sent");
+  };
+
+  socket.on("webrtc-offer", handleOffer);
+
+  return () => {
+    socket.off("webrtc-offer", handleOffer);
+  };
+}, []);
 
 useEffect(() => {
   const handlePartyEnded = () => {
@@ -137,6 +258,9 @@ useEffect(() => {
   <h1 className="text-2xl font-bold">
     🎉 Watch Party
   </h1>
+    <LocalVideo
+        onStreamReady={setLocalStream}
+ />
 
 <div className="bg-gray-100 px-4 py-2 rounded-lg flex items-center gap-4">
   <div>

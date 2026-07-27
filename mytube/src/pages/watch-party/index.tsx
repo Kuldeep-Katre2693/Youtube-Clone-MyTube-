@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { useRouter } from "next/router";
+import LocalVideo from "@/components/LocalVideo";
+import { useRef } from "react";
+
 
 export default function WatchPartyHome() {
   const [partyCode, setPartyCode] = useState("");
   const router = useRouter();
-
   const joinParty = () => {
     if (!partyCode.trim()) return;
 
@@ -21,6 +23,8 @@ export default function WatchPartyHome() {
       <p className="text-gray-500 mt-2">
         Watch videos together in real time.
       </p>
+
+    
 
       <div className="mt-10 max-w-md">
 

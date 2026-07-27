@@ -6,6 +6,27 @@ const activeRooms = {};
 export const initializeSocket = (io) => {
   io.on("connection", (socket) => {
 
+    socket.on("webrtc-offer", ({ offer, target }) => {
+  io.to(target).emit("webrtc-offer", {
+    offer,
+    sender: socket.id,
+  });
+});
+
+socket.on("webrtc-answer", ({ answer, target }) => {
+  io.to(target).emit("webrtc-answer", {
+    answer,
+    sender: socket.id,
+  });
+});
+
+socket.on("ice-candidate", ({ candidate, target }) => {
+  io.to(target).emit("ice-candidate", {
+    candidate,
+    sender: socket.id,
+  });
+});
+
     socket.on("join-party", ({ partyCode, user }) => {
 
       socket.join(partyCode);
@@ -30,12 +51,18 @@ console.log("Socket:", socket.id);
           name: user.name,
           image: user.image,
         });
-      
-
+        console.log("Room members before emit:", activeRooms[partyCode]);
+console.log("Emitting user-joined-call from:", socket.id);
+        socket.to(partyCode).emit("user-joined-call", {
+  socketId: socket.id,
+  userId: user._id,
+  name: user.name,
+});
+console.log("Emitting participants-update");
+console.log(activeRooms[partyCode]);
       io.to(partyCode).emit(
         "participants-update",
         activeRooms[partyCode]
-     
       );
     socket.to(partyCode).emit("system-message", {
     type: "join",
@@ -117,18 +144,18 @@ console.log("Socket:", socket.id);
 
     if (!leavingUser) continue;
 
-    // Remove the user
+    
     activeRooms[partyCode] = activeRooms[partyCode].filter(
       (u) => u.socketId !== socket.id
     );
 
-    // Update participant list
+    
     io.to(partyCode).emit(
       "participants-update",
       activeRooms[partyCode]
     );
 
-    // Send leave notification
+    
     io.to(partyCode).emit("system-message", {
       type: "leave",
       text: `${leavingUser.name} left the watch party`,
