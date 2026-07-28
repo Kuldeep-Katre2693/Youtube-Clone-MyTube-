@@ -10,31 +10,50 @@ export default function LocalVideo({
   const videoRef = useRef<HTMLVideoElement>(null);
 
  useEffect(() => {
+  let stream: MediaStream | null = null;
+
   const startCamera = async () => {
     try {
-      console.log("Requesting camera...");
-
-      const stream = await navigator.mediaDevices.getUserMedia({
+      stream = await navigator.mediaDevices.getUserMedia({
         video: true,
         audio: true,
       });
 
-      console.log("Camera acquired");
-
       onStreamReady(stream);
-
-      console.log("onStreamReady called");
 
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
       }
     } catch (err) {
       console.error("Camera error:", err);
+
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({
+          audio: true,
+        });
+
+        console.log("Audio-only stream started");
+
+        onStreamReady(stream);
+      } catch (e) {
+        console.error("Audio also failed:", e);
+      }
     }
   };
 
   startCamera();
+
+  return () => {
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop());
+    }
+    if (videoRef.current) {
+    videoRef.current.srcObject = null;
+  }
+  };
 }, [onStreamReady]);
+
+
 
   return (
     <video

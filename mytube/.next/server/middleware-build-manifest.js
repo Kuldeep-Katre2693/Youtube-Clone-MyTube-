@@ -24,11 +24,6 @@ globalThis.__BUILD_MANIFEST = {
       "static/chunks/webpack.js",
       "static/chunks/main.js",
       "static/chunks/pages/watch-party/[partyCode].js"
-    ],
-    "/watch/[id]": [
-      "static/chunks/webpack.js",
-      "static/chunks/main.js",
-      "static/chunks/pages/watch/[id].js"
     ]
   },
   "ampFirstPages": []

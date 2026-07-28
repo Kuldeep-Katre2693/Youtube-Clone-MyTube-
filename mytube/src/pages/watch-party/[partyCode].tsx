@@ -9,6 +9,7 @@ import ParticipantsPanel from "@/components/ParticipantsPanel";
 import { Copy } from "lucide-react";
 import { toast } from "sonner";
 import LocalVideo from "@/components/LocalVideo";
+import RemoteVideo from "@/components/RemoteVideo";
 
 export default function WatchPartyPage() {
   const router = useRouter();
@@ -23,6 +24,8 @@ export default function WatchPartyPage() {
   const [localStream, setLocalStream] = useState<MediaStream | null>(null);
   const remoteSocketId = useRef<string | null>(null);
   const [remoteSocket, setRemoteSocket] = useState<string | null>(null);
+  const [remoteStream, setRemoteStream] =
+  useState<MediaStream | null>(null);
 
 
   const copyPartyCode = async () => {
@@ -114,37 +117,67 @@ console.log("HOST emitting join-party");
   };
 }, [party, user]);
 
-  useEffect(() => {
-  if (!localStream || peerConnection.current) return;
+ useEffect(() => {
+    if (peerConnection.current) return;
 
-  const pc = new RTCPeerConnection({
-    iceServers: [
-      {
-        urls: "stun:stun.l.google.com:19302",
-      },
-    ],
-  });
+    const pc = new RTCPeerConnection({
+        iceServers: [
+            {
+                urls: "stun:stun.l.google.com:19302",
+            },
+        ],
+    });
+    pc.onicecandidate = (event) => {
+  if (event.candidate) {
+    console.log("Sending ICE candidate");
 
-  localStream.getTracks().forEach((track) => {
-    pc.addTrack(track, localStream);
-  });
+    socket.emit("ice-candidate", {
+      candidate: event.candidate,
+      target: remoteSocketId.current,
+    });
+  }
+};
+pc.ontrack = (event) => {
+  console.log("🎥 Remote track received");
+  console.log("Track kind:", event.track.kind);
+  console.log("Track:", event.track);
+  console.log("Streams:", event.streams);
 
-  peerConnection.current = pc;
-  if (remoteSocketId.current) {
-  console.log("Remote already exists:", remoteSocketId.current);
-}
-    console.log("RTCPeerConnection created on host");
-  console.log("Remote socket:", remoteSocketId.current);
+    setRemoteStream(event.streams[0]);
+};
 
-  console.log("RTCPeerConnection created");
-}, [localStream]);
+    peerConnection.current = pc;
+    
+
+    console.log("RTCPeerConnection created");
+}, []);
 
 useEffect(() => {
-  if (localStream) {
-    console.log("Local stream ready", localStream);
-      console.log("localStream changed:", localStream);
+  if (!localStream) return;
+  if (!peerConnection.current) return;
 
-  }
+  const existingTrackIds = new Set(
+    peerConnection.current
+      .getSenders()
+      .map(sender => sender.track?.id)
+      .filter(Boolean)
+  );
+
+  localStream.getTracks().forEach(track => {
+    if (!existingTrackIds.has(track.id)) {
+      peerConnection.current!.addTrack(track, localStream);
+      console.log(
+        "Added track:",
+        track.kind,
+        track.readyState
+    );
+    }
+  });
+
+  console.log(
+    "Total senders:",
+    peerConnection.current.getSenders().length
+  );
 }, [localStream]);
 
 useEffect(() => {
@@ -165,8 +198,16 @@ useEffect(() => {
   const startOffer = async () => {
     if (!peerConnection.current) return;
     if (!remoteSocket) return;
+    if (!localStream) return;
 
     console.log("Creating offer...");
+
+    const senders = peerConnection.current.getSenders();
+
+    if (senders.length === 0) {
+      console.log("Tracks not added yet.");
+      return;
+    }
 
     const offer = await peerConnection.current.createOffer();
 
@@ -180,8 +221,10 @@ useEffect(() => {
     console.log("Offer sent");
   };
 
+ 
+
   startOffer();
-}, [remoteSocket]);
+}, [remoteSocket, localStream]);
 
 useEffect(() => {
   const handleOffer = async ({
@@ -195,37 +238,100 @@ useEffect(() => {
 
     remoteSocketId.current = sender;
 
-    if (!peerConnection.current) return;
+    console.log("PeerConnection:", peerConnection.current);
 
-    await peerConnection.current.setRemoteDescription(
-      new RTCSessionDescription(offer)
-    );
+    if (!peerConnection.current) {
+      console.log("❌ PeerConnection is NULL");
+      return;
+    }
 
-    console.log("Remote description set");
+    try {
+      console.log("1. Setting remote description...");
 
-    const answer =
-      await peerConnection.current.createAnswer();
+      await peerConnection.current.setRemoteDescription(
+        new RTCSessionDescription(offer)
+      );
 
-    console.log("Answer created");
+      console.log("2. Remote description set");
 
-    await peerConnection.current.setLocalDescription(
-      answer
-    );
+      console.log("3. Creating answer...");
 
-    console.log("Local description set");
+      const answer = await peerConnection.current.createAnswer();
 
-    socket.emit("webrtc-answer", {
-      answer,
-      target: sender,
-    });
+      console.log("4. Answer created");
 
-    console.log("Answer sent");
+      await peerConnection.current.setLocalDescription(answer);
+
+      console.log("5. Local description set");
+
+      socket.emit("webrtc-answer", {
+        answer,
+        target: sender,
+      });
+
+      console.log("6. Answer sent");
+    } catch (err) {
+      console.error("❌ Offer handling error:", err);
+    }
   };
 
   socket.on("webrtc-offer", handleOffer);
 
+
   return () => {
     socket.off("webrtc-offer", handleOffer);
+  };
+}, []);
+
+useEffect(() => {
+  const handleAnswer = async ({
+    answer,
+  }: {
+    answer: RTCSessionDescriptionInit;
+  }) => {
+    console.log("Answer received");
+
+    if (!peerConnection.current) return;
+
+    await peerConnection.current.setRemoteDescription(
+      new RTCSessionDescription(answer)
+    );
+
+    console.log("Remote description set on host");
+  };
+
+  socket.on("webrtc-answer", handleAnswer);
+
+  return () => {
+    socket.off("webrtc-answer", handleAnswer);
+  };
+}, []);
+
+useEffect(() => {
+  const handleIceCandidate = async ({
+    candidate,
+  }: {
+    candidate: RTCIceCandidateInit;
+  }) => {
+    console.log("ICE candidate received");
+
+    if (!peerConnection.current) return;
+
+    try {
+      await peerConnection.current.addIceCandidate(
+        new RTCIceCandidate(candidate)
+      );
+
+      console.log("ICE candidate added");
+    } catch (err) {
+      console.error("ICE error:", err);
+    }
+  };
+
+  socket.on("ice-candidate", handleIceCandidate);
+
+  return () => {
+    socket.off("ice-candidate", handleIceCandidate);
   };
 }, []);
 
@@ -249,8 +355,19 @@ useEffect(() => {
   };
 }, []);
 
+ useEffect(() => {
+  return () => {
+    if (peerConnection.current) {
+      peerConnection.current.close();
+      peerConnection.current = null;
+    }
+  };
+}, []);
+
 
   if (!party) return <div>Party not found</div>;
+
+  
 
   return (
     <div className="p-6">
@@ -261,6 +378,7 @@ useEffect(() => {
     <LocalVideo
         onStreamReady={setLocalStream}
  />
+ <RemoteVideo stream={remoteStream} />
 
 <div className="bg-gray-100 px-4 py-2 rounded-lg flex items-center gap-4">
   <div>
