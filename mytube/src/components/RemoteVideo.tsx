@@ -30,7 +30,6 @@ export default function RemoteVideo({
       ref={videoRef}
       autoPlay
       playsInline
-      className="w-full rounded-lg bg-black"
-    />
+className="w-full rounded-xl border border-zinc-700 bg-black shadow-lg aspect-video object-cover"    />
   );
 }

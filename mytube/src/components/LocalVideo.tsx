@@ -61,7 +61,6 @@ export default function LocalVideo({
       autoPlay
       playsInline
       muted
-      className="w-full rounded-lg bg-black"
-    />
+className="w-full rounded-xl border border-zinc-700 bg-black shadow-lg aspect-video object-cover"    />
   );
 }

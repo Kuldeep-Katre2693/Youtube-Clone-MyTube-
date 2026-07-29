@@ -7,7 +7,10 @@ export const initializeSocket = (io) => {
   io.on("connection", (socket) => {
 
     socket.on("webrtc-offer", ({ offer, target }) => {
-  io.to(target).emit("webrtc-offer", {
+  console.log("📤 Server forwarding OFFER");
+  console.log("Sender:", socket.id);
+  console.log("Target:", target);
+      io.to(target).emit("webrtc-offer", {
     offer,
     sender: socket.id,
   });
@@ -21,6 +24,9 @@ socket.on("webrtc-answer", ({ answer, target }) => {
 });
 
 socket.on("ice-candidate", ({ candidate, target }) => {
+    console.log("📤 Server forwarding ICE");
+  console.log("Sender:", socket.id);
+  console.log("Target:", target);
   io.to(target).emit("ice-candidate", {
     candidate,
     sender: socket.id,

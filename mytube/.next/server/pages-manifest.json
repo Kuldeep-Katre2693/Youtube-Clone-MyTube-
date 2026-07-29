@@ -2,5 +2,6 @@
   "/_app": "pages/_app.js",
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
-  "/watch-party/[partyCode]": "pages/watch-party/[partyCode].js"
+  "/watch-party/[partyCode]": "pages/watch-party/[partyCode].js",
+  "/": "pages/index.js"
 }

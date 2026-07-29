@@ -91,11 +91,11 @@ useEffect(() => {
   return (
     <div className="border rounded-lg p-4">
       <h2 className="font-bold mb-3">Live Chat</h2>
-<div className="h-64 overflow-y-auto border rounded p-2 mb-3">
+<div className="h-80 overflow-y-auto bg-zinc-950 border border-zinc-700 rounded-lg p-3 mb-3">
   {messages.map((msg: any, index: number) => {
     const isOwnMessage =
   String(msg.sender?._id || msg.sender) === String(user?._id);
-    
+
     if (msg.type === "join") {
       return (
         <div
@@ -126,22 +126,28 @@ className={`flex mb-3 ${
 }`}
 >
   <div
-    className={`max-w-[75%] rounded-xl px-4 py-2 ${
+  className={`max-w-[80%] rounded-xl px-4 py-3 shadow ${
   isOwnMessage
     ? "bg-red-600 text-white"
-    : "bg-gray-100 text-black"
+    : "bg-zinc-800 text-white border border-zinc-700"
 }`}
   >
     <div className="flex items-center justify-between">
-      <strong className="text-sm font-semibold">
+      <strong
+  className={`text-sm font-semibold ${
+    isOwnMessage
+      ? "text-red-100"
+      : "text-red-400"
+  }`}
+>
         {isOwnMessage ? "You" : msg.senderName}
       </strong>
 
       <span
-       className={`text-xs ${
+      className={`text-xs ${
   isOwnMessage
     ? "text-red-100"
-    : "text-gray-500"
+    : "text-zinc-400"
 }`}
       >
         {msg.createdAt
@@ -150,8 +156,8 @@ className={`flex mb-3 ${
       </span>
     </div>
 
-    <p className="mt-1 break-words">
-      {msg.text}
+<p className="mt-2 break-words leading-relaxed">
+        {msg.text}
     </p>
   </div>
 </div>
@@ -163,7 +169,7 @@ className={`flex mb-3 ${
 
       <div className="flex gap-2">
         <input
-          className="flex-1 border rounded px-3 py-2"
+       className="flex-1 bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-white placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-red-500"
           value={chatMessage}
           onChange={(e) => setChatMessage(e.target.value)}
           placeholder="Type a message..."
@@ -171,8 +177,7 @@ className={`flex mb-3 ${
 
         <button
           onClick={sendMessage}
-          className="bg-red-600 text-white px-4 rounded"
-        >
+className="bg-red-600 hover:bg-red-700 transition px-5 rounded-xl text-white font-medium"        >
           Send
         </button>
       </div>

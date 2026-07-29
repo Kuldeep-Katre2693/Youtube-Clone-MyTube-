@@ -37,23 +37,23 @@ export default function ParticipantsPanel({
   }, []);
 
   return (
-    <div className="border rounded-lg p-4">
-      <h2 className="font-bold mb-4">
+    <div className="bg-zinc-900 border border-zinc-700 rounded-xl p-5 shadow-lg">
+      <h2 className="text-lg font-semibold mb-4 text-white">
         Participants ({participants.length})
       </h2>
 
       {participants.map((participant) => (
         <div
           key={participant.socketId}
-          className="flex items-center gap-3 mb-3"
+          className="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-800 transition"
         >
           <img
             src={participant.image}
-            className="w-10 h-10 rounded-full"
+           className="w-12 h-12 rounded-full border-2 border-red-500"
           />
 
           <div className="flex flex-col">
-            <span className="font-medium">
+            <span className="font-semibold text-white">
               {participant.name}
 
               {participant.userId === hostId && (
@@ -70,7 +70,10 @@ export default function ParticipantsPanel({
             </span>
 
             <span className="text-green-600 text-sm">
-              🟢 Online
+              <div className="flex items-center gap-2 text-sm text-green-400">
+    <div className="w-2 h-2 rounded-full bg-green-500"></div>
+    Online
+</div>
             </span>
           </div>
         </div>
