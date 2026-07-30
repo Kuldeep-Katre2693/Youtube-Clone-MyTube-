@@ -55,12 +55,25 @@ export default function LocalVideo({
 
 
 
-  return (
+return (
+  <div className="bg-zinc-900 rounded-xl p-3 border border-zinc-700 shadow-lg">
+
+    <div className="flex items-center justify-between mb-2">
+      <h3 className="text-sm font-semibold text-white">
+        You
+      </h3>
+
+      <div className="w-2 h-2 rounded-full bg-green-500"></div>
+    </div>
+
     <video
       ref={videoRef}
       autoPlay
       playsInline
       muted
-className="w-full rounded-xl border border-zinc-700 bg-black shadow-lg aspect-video object-cover"    />
-  );
+      className="w-full rounded-lg aspect-video bg-black object-cover"
+    />
+
+  </div>
+);
 }

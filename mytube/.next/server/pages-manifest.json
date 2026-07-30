@@ -3,5 +3,6 @@
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
   "/watch-party/[partyCode]": "pages/watch-party/[partyCode].js",
-  "/": "pages/index.js"
+  "/": "pages/index.js",
+  "/watch/[id]": "pages/watch/[id].js"
 }
