@@ -22,8 +22,9 @@ export default function ParticipantsPanel({
 
   const [participants, setParticipants] = useState<Participant[]>([]);
   const remoteParticipant = participants.find(
-  (participant) => participant.userId !== user?._id
+  (participant) => String(participant.userId) !== String(user?._id)
 );
+{remoteParticipant?.name ?? "Participant"}
 
   useEffect(() => {
     const handleParticipants = (users: Participant[]) => {
