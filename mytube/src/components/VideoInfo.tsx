@@ -147,9 +147,14 @@ fetch(fileUrl)
 
     window.URL.revokeObjectURL(url);
   });
-    } catch (error) {
-      console.log(error);
-    }
+    } catch (error: any) {
+  console.error(error);
+
+  toast.error(
+    error.response?.data?.message ||
+      "Failed to download video."
+  );
+}
   };
 
   const handleStartWatchParty = async () => {
@@ -183,8 +188,8 @@ fetch(fileUrl)
     <div className="space-y-4">
         <h1 className="text-xl font-semibold">{video.videotitle}</h1>
 
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
+        <div className="flex items-start justify-between gap-4 flex-wrap">
+          <div className="flex items-center gap-2 flex-wrap">
             <Avatar className="w-10 h-10">
               <AvatarFallback>{video.videochanel[0]}</AvatarFallback>
             </Avatar>
@@ -243,24 +248,26 @@ fetch(fileUrl)
               <Share className="w-5 h-5 mr-2" />
               Share
             </Button>
+         
             <Button
   variant="ghost"
   size="sm"
-  className="bg-gray-100 rounded-full"
+  className="bg-gray-100 rounded-full flex-none w-auto  "
   onClick={handleStartWatchParty}
 >
   <Users className="w-5 h-5 mr-2" />
   Watch Party
 </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="bg-gray-100 rounded-full"
-              onClick={handleDownload}
-            >
-              <Download className="w-5 h-5 mr-2" />
-              Download
-            </Button>
+ <Button
+  variant="ghost"
+  size="sm"
+  className="bg-gray-100 rounded-full"
+  onClick={handleDownload}
+>
+  <Download className="w-5 h-5 mr-2" />
+  Download
+</Button>
+          
             <Button
               variant="ghost"
               size="icon"

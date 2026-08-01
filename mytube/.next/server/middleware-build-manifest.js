@@ -25,15 +25,15 @@ globalThis.__BUILD_MANIFEST = {
       "static/chunks/main.js",
       "static/chunks/pages/_error.js"
     ],
-    "/watch-party": [
+    "/downloads": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
-      "static/chunks/pages/watch-party.js"
+      "static/chunks/pages/downloads.js"
     ],
-    "/watch-party/[partyCode]": [
+    "/watch/[id]": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
-      "static/chunks/pages/watch-party/[partyCode].js"
+      "static/chunks/pages/watch/[id].js"
     ]
   },
   "ampFirstPages": []
