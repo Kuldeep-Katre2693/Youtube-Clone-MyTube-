@@ -14,12 +14,13 @@ import { Button } from "./ui/button";
 import Channeldialogue from "./channeldialogue";
 import { useUser } from "@/lib/AuthContext";
 
-const Sidebar = () => {
+const Sidebar = () =>{
   const { user } = useUser();
 
   const [isdialogeopen, setisdialogeopen] = useState(false);
   return (
-<aside className="w-64 bg-background border-r min-h-screen p-2 transition-colors duration-300">      <nav className="space-y-1">
+<aside className="w-64 bg-background border-r min-h-screen p-2 transition-colors duration-300">
+     <nav className="space-y-1">
         <Link href="/">
           <Button variant="ghost" className="w-full justify-start">
             <Home className="w-5 h-5 mr-3" />
@@ -60,12 +61,12 @@ const Sidebar = () => {
                   Watch later
                 </Button>
               </Link>
-             <Link href="/watch-party">
-  <div className="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-muted cursor-pointer transition">
-    <User className="w-5 h-5" />
-    <span>Watch Party</span>
-  </div>
-</Link>
+           <Link href="/watch-party">
+  <Button variant="ghost" className="w-full justify-start">
+    <User className="w-5 h-5 mr-3" />
+    Watch Party
+  </Button>
+</Link> 
               <Link href="/downloads">
   <Button variant="ghost" className="w-full justify-start">
     <Download className="w-5 h-5 mr-3" />
