@@ -7,6 +7,7 @@ import { useUser } from "@/lib/AuthContext";
 import axiosInstance from "@/lib/axiosinstance";
 import { ThumbsUp, ThumbsDown, Flag } from "lucide-react";
 import ReportDialog from "./ReportDialog";
+import {toast} from "sonner";
 interface Comment {
   _id: string;
   videoid: string;
@@ -40,24 +41,7 @@ const Comments = ({ videoId }: any) => {
   const [reportDialogOpen, setReportDialogOpen] = useState(false);
   const [selectedCommentId, setSelectedCommentId] = useState("");
   const [translatingId, setTranslatingId] = useState("");
-  const fetchedComments = [
-    {
-      _id: "1",
-      videoid: videoId,
-      userid: "1",
-      commentbody: "Great video! Really enjoyed watching this.",
-      usercommented: "John Doe",
-      commentedon: new Date(Date.now() - 3600000).toISOString(),
-    },
-    {
-      _id: "2",
-      videoid: videoId,
-      userid: "2",
-      commentbody: "Thanks for sharing this amazing content!",
-      usercommented: "Jane Smith",
-      commentedon: new Date(Date.now() - 7200000).toISOString(),
-    },
-  ];
+
   useEffect(() => {
     loadComments();
   }, [videoId]);
@@ -76,6 +60,7 @@ const Comments = ({ videoId }: any) => {
   if (loading) {
     return <div>Loading history...</div>;
   }
+
   const handleSubmitComment = async () => {
     if (!user || !newComment.trim()) return;
 
@@ -89,15 +74,20 @@ const Comments = ({ videoId }: any) => {
       });
      if (res.data.comment) {
   await loadComments();
+  setNewComment("");
+  toast.success("Comment posted successfully.");
+}
+   } catch (error: any) {
+  console.error(error);
 
-       setNewComment("");
-      }
-      setNewComment("");
-    } catch (error) {
-      console.error("Error adding comment:", error);
-    } finally {
-      setIsSubmitting(false);
-    }
+  toast.error(
+    error.response?.data?.message ||
+      "Failed to post comment."
+  );
+}
+ finally {
+    setIsSubmitting(false);
+  }
   };
 
   const handleEdit = (comment: Comment) => {
