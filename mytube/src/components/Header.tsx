@@ -30,17 +30,6 @@ const Header= ({
   const [isdialogeopen, setisdialogeopen] = useState(false);
   const [isSubscriptionOpen, setIsSubscriptionOpen] = useState(false);
   const [subscriptionOpen, setSubscriptionOpen] = useState(false);
-  const languages = [
-  { code: "en", name: "English" },
-  { code: "hi", name: "Hindi" },
-  { code: "mr", name: "Marathi" },
-  { code: "ta", name: "Tamil" },
-  { code: "te", name: "Telugu" },
-  { code: "ml", name: "Malayalam" },
-  { code: "kn", name: "Kannada" },
-  { code: "gu", name: "Gujarati" },
-  { code: "bn", name: "Bengali" },
-];
   const router = useRouter();
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -66,21 +55,6 @@ const Header= ({
     await refreshUser(user._id);
   } catch (error) {
     console.error(error);
-  }
-};
-
-const handleLanguageChange = async (language) => {
-  if (!user) return;
-
-  try {
-    await axiosInstance.patch(`/user/language/${user._id}`, {
-      preferredLanguage: language,
-    });
-
-    await refreshUser(user._id);
-
-  } catch (error) {
-    console.log(error);
   }
 };
 
@@ -148,18 +122,6 @@ const handleLanguageChange = async (language) => {
     <Moon className="w-5 h-5" />
   )}
 </Button>
-
-<select
-  value={user?.preferredLanguage || "en"}
-  onChange={(e) => handleLanguageChange(e.target.value)}
-  className="rounded-md border bg-background px-2 py-1 text-sm"
->
-  {languages.map((lang) => (
-    <option key={lang.code} value={lang.code}>
-      {lang.name}
-    </option>
-  ))}
-</select>
             
             <Button variant="ghost" size="icon">
               <Bell className="w-6 h-6" />

@@ -8,6 +8,13 @@ import axiosInstance from "@/lib/axiosinstance";
 import { ThumbsUp, ThumbsDown, Flag } from "lucide-react";
 import ReportDialog from "./ReportDialog";
 import {toast} from "sonner";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
+import {languages} from "@/lib/languages";
 interface Comment {
   _id: string;
   videoid: string;
@@ -227,14 +234,14 @@ const handleReport = async (reason: string) => {
   }
 };
 
-const handleTranslate = async (commentId: string) => {
+const handleTranslate = async (commentId: string, targetLanguage: string) => {
   try {
     setTranslatingId(commentId);
 
    const res = await axiosInstance.post(
   `/comment/translate/${commentId}`,
   {
-    targetLanguage: user?.preferredLanguage || "en",
+    targetLanguage,
   }
 );
 
@@ -244,7 +251,7 @@ const handleTranslate = async (commentId: string) => {
           ? {
               ...comment,
               translatedText: res.data.translatedText,
-              translatedLanguage: "en",
+              translatedLanguage: targetLanguage,
             }
           : comment
       )
@@ -387,16 +394,23 @@ const handleTranslate = async (commentId: string) => {
       {comment.dislikes.length}
     </button>
 
-    <button
-  onClick={() => handleTranslate(comment._id)}
-  disabled={translatingId === comment._id}
-  className="text-blue-600 hover:underline"
->
-  {translatingId === comment._id
-    ? "Translating..."
-    : "🌍 Translate"}
-</button>
+    <DropdownMenu>
+  <DropdownMenuTrigger asChild>
+    <Button variant="ghost" size="sm">
+      Translate
+    </Button>
+  </DropdownMenuTrigger>
 
+  <DropdownMenuContent align="start">
+    {languages.map((lang) => (
+      <DropdownMenuItem
+        key={lang.code}
+onClick={() => handleTranslate(comment._id, lang.code)}      >
+        {lang.name}
+      </DropdownMenuItem>
+    ))}
+  </DropdownMenuContent>
+</DropdownMenu>
     
    {comment.userid._id !== user?._id && (
   <button

@@ -1,26 +1,45 @@
 "use client";
-
+import{useState}from"react";
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
 import { Avatar, AvatarFallback } from "./ui/avatar";
 
 export default function VideoCard({ video }: any) {
   const videoUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL}/${video.filepath.replace(/\\/g, "/")}`;
+  const [duration, setDuration] = useState("0:00");
+
+const formatDuration = (seconds: number) => {
+  if (!isFinite(seconds)) return "0:00";
+
+  const hrs = Math.floor(seconds / 3600);
+  const mins = Math.floor((seconds % 3600) / 60);
+  const secs = Math.floor(seconds % 60);
+
+  if (hrs > 0) {
+    return `${hrs}:${mins.toString().padStart(2, "0")}:${secs
+      .toString()
+      .padStart(2, "0")}`;
+  }
+
+  return `${mins}:${secs.toString().padStart(2, "0")}`;
+};
 
   return (
     <Link href={`/watch/${video._id}`} className="group">
       <div className="space-y-3">
         <div className="relative aspect-video rounded-lg overflow-hidden bg-muted transition-colors duration-300">
           <video
-            src={videoUrl}
-            controls
-            preload="metadata"
-            className="w-full h-full object-cover"
-          />
+  src={videoUrl}
+  preload="metadata"
+  className="w-full h-full object-cover"
+  onLoadedMetadata={(e) => {
+    setDuration(formatDuration(e.currentTarget.duration));
+  }}
+/>
 
           <div className="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-1 rounded">
-            10:24
-          </div>
+  {duration}
+</div>
         </div>
 
         <div className="flex gap-3">
