@@ -268,7 +268,7 @@ const handleTranslate = async (commentId: string) => {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-xl font-semibold">{comments.length} Comments</h2>
+      <h2 className="text-xl font-semibold text-black dark:text-white">{comments.length} Comments</h2>
 
       {user && (
         <div className="flex gap-4">
@@ -303,7 +303,7 @@ const handleTranslate = async (commentId: string) => {
       )}
       <div className="space-y-4">
         {comments.length === 0 ? (
-          <p className="text-sm text-gray-500 italic">
+          <p className="text-sm text-gray-500 dark:text-gray-400 italic">
             No comments yet. Be the first to comment!
           </p>
         ) : (
@@ -315,10 +315,10 @@ const handleTranslate = async (commentId: string) => {
               </Avatar>
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="font-medium text-sm">
+                  <span className="font-medium text-sm  text-black dark:text-white">
                     {comment.userid.name}
                   </span>
-                  <span className="text-xs text-gray-600">
+                  <span className="text-xs text-gray-600 dark:text-gray-400">
                     {formatDistanceToNow(new Date(comment.commentedon))} ago
                   </span>
                 </div>
@@ -349,7 +349,7 @@ const handleTranslate = async (commentId: string) => {
                   </div>
                 ) : (
                  <>
-  <p className="text-sm">
+  <p className="text-sm text-black dark:text-gray-100">
   {comment.commentbody}
   </p>
 
@@ -365,7 +365,7 @@ const handleTranslate = async (commentId: string) => {
   </div>
 )}
 
-  <div className="flex items-center gap-4 mt-2 text-sm text-gray-600">
+  <div className="flex items-center gap-4 mt-2 text-sm text-gray-600 dark:text-gray-400">
 
     <button
       onClick={() => handleLike(comment._id)}
