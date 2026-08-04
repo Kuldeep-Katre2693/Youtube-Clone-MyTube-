@@ -45,7 +45,7 @@ const SearchResult = ({ query }: any) => {
     let results = allVideos.filter(
       (vid) =>
         vid.videotitle.toLowerCase().includes(query.toLowerCase()) ||
-        vid.videochanel.toLowerCase().includes(query.toLowerCase())
+        vid.videochanel.toLowerCase().includes(query.toLowerCase()),
     );
     setvideos(results);
   };
@@ -112,7 +112,7 @@ const SearchResult = ({ query }: any) => {
                   href={`/channel/${video.uploader}`}
                   className="flex items-center gap-2 mb-2 hover:text-blue-600"
                 >
-                  <Avatar className="w-6h-6">
+                  <Avatar className="w-6 h-6">
                     <AvatarImage src={video.image} />
                     <AvatarFallback className="text-xs">
                       {video.videochanel[0]}
@@ -138,7 +138,7 @@ const SearchResult = ({ query }: any) => {
       {hasResults && (
         <div className="text-center py-8">
           <p className="text-gray-600">
-            Showing {videos.length} results for "{query}"
+            Showing {video.length} results for "{query}"
           </p>
         </div>
       )}

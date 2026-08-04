@@ -1,8 +1,8 @@
 import nodemailer from "nodemailer";
 
 const transporter = nodemailer.createTransport({
- host: "smtp-relay.brevo.com",
- port: 2525,
+  host: "smtp-relay.brevo.com",
+  port: 2525,
   secure: false,
   auth: {
     user: process.env.BREVO_SMTP_USER,
@@ -106,11 +106,12 @@ export const sendOTPEmail = async (email, otp) => {
     `,
   };
 
-try {
-  await transporter.sendMail(mailOptions);
-  console.log("Email sent successfully");
-} catch (err) {
-  console.error("SMTP ERROR:");
-  console.error(err);
-  throw err;
-}};
+  try {
+    await transporter.sendMail(mailOptions);
+    console.log("Email sent successfully");
+  } catch (err) {
+    console.error("SMTP ERROR:");
+    console.error(err);
+    throw err;
+  }
+};

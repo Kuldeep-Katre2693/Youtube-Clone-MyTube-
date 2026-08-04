@@ -32,11 +32,15 @@ export const getallcomment = async (req, res) => {
   try {
 const commentvideo = await comment
   .find({
-    videoid: videoid,
+    videoid,
     moderationStatus: "approved",
   })
   .populate("userid", "name image")
   .sort({ createdAt: -1 });
+
+const validComments = commentvideo.filter(c => c.userid);
+
+return res.status(200).json(validComments);
       return res.status(200).json(commentvideo);
   } catch (error) {
     console.error(" error:", error);
