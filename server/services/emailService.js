@@ -98,5 +98,11 @@ export const sendOTPEmail = async (email, otp) => {
     `,
   };
 
+try {
   await transporter.sendMail(mailOptions);
-};
+  console.log("Email sent successfully");
+} catch (err) {
+  console.error("SMTP ERROR:");
+  console.error(err);
+  throw err;
+}};
