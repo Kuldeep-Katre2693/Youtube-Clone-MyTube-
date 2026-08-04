@@ -32,7 +32,7 @@ const watchPartyMessageSchema = new mongoose.Schema(
 );
 
 const WatchPartyMessage =
-  mongoose.models.WatchPartyMessage ||
+  mongoose.Models.WatchPartyMessage ||
   mongoose.model("WatchPartyMessage", watchPartyMessageSchema);
 
 export default WatchPartyMessage;

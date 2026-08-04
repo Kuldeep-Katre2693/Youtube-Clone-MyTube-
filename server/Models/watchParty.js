@@ -38,7 +38,7 @@ const watchPartySchema = new mongoose.Schema(
 );
 
 const WatchParty =
-  mongoose.models.watchParty ||
+  mongoose.Models.watchParty ||
   mongoose.model("watchParty", watchPartySchema);
 
 export default WatchParty;
