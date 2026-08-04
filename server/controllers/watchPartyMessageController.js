@@ -1,4 +1,4 @@
-import WatchParty from "../models/watchParty.js";
+import WatchParty from "../Models/watchParty.js";
 import WatchPartyMessage from "../models/WatchPartyMessage.js";
 
 export const getChatHistory = async (req, res) => {
