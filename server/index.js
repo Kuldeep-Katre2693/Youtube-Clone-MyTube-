@@ -58,7 +58,7 @@ mongoose
   .connect(DBURL)
   .then(() => {
     console.log("Mongodb connected");
-       console.log("Database:", mongoose.connection.name);
+    console.log("Database:", mongoose.connection.name);
   })
   .catch((error) => {
     console.log(error);
