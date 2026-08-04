@@ -2,12 +2,20 @@ import nodemailer from "nodemailer";
 
 const transporter = nodemailer.createTransport({
  host: "smtp-relay.brevo.com",
- port: 587,
+ port: 2525,
   secure: false,
   auth: {
     user: process.env.BREVO_SMTP_USER,
     pass: process.env.BREVO_SMTP_PASS,
   },
+});
+
+transporter.verify(function (error, success) {
+  if (error) {
+    console.error("SMTP Verify Error:", error);
+  } else {
+    console.log("SMTP Server is ready.");
+  }
 });
 
 export const sendSubscriptionEmail = async ({
@@ -74,7 +82,7 @@ export const sendSubscriptionEmail = async ({
 
 export const sendOTPEmail = async (email, otp) => {
   const mailOptions = {
-    from: `"MyTube" <${process.env.EMAIL_USER}>`,
+    from: `"MyTube" <${process.env.EMAIL_FROM}>`,
     to: email,
     subject: "MyTube Login Verification Code",
     html: `
