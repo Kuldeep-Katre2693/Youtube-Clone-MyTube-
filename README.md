@@ -503,9 +503,8 @@ Priyadarshini Bhagwati College of Engineering, Nagpur
 
 ### Connect with me
 
-* 💼 LinkedIn: *Add your LinkedIn URL*
-* 💻 GitHub: *Add your GitHub URL*
-* 📧 Email: *Add your Email*
+* 💼 LinkedIn:(https://www.linkedin.com/in/kuldeep-katre-863557253/)
+* 📧 Email: kuldeepkatre2693@gmail.com
 
 ---
 
@@ -516,5 +515,3 @@ Priyadarshini Bhagwati College of Engineering, Nagpur
 **Built with ❤️ using Next.js, React, Node.js, MongoDB, Firebase, Socket.IO & WebRTC**
 
 </div>
-
-Those additions can make the repository stand out much more to recruiters and internship reviewers.
